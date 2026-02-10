@@ -1,0 +1,58 @@
+global:
+  scrape_interval: 30s
+  scrape_timeout: 10s
+
+rule_files:
+  - alert.yml
+
+scrape_configs:
+  - job_name: prometheus
+    metrics_path: /metrics
+    scrape_interval: 15s
+    dns_sd_configs:
+      - names:
+        - tasks.prometheus
+        type: A
+        port: 9090
+  - job_name: grafana
+    metrics_path: /metrics
+    scrape_interval: 15s
+    dns_sd_configs:
+      - names:
+        - tasks.grafana
+        type: A
+        port: 3000
+  - job_name: hotelapi
+    metrics_path: /metrics
+    scrape_interval: 15s
+    dns_sd_configs:
+      - names:
+        - tasks.hotelapi
+        type: A
+        port: 5000
+  - job_name: eventecapi
+    metrics_path: /metrics
+    scrape_interval: 15s
+    dns_sd_configs:
+      - names:
+        - tasks.eventecapi
+        type: A
+        port: 5000
+  - job_name: postgres
+    metrics_path: /metrics
+    scrape_interval: 15s
+    dns_sd_configs:
+      - names:
+        - tasks.pg_exporter
+        type: A
+        port: 9187
+  - job_name: 'docker-managers'
+    scrape_interval: 15s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['20.225.90.108:9100']
+  - job_name: 'docker-workers'
+    scrape_interval: 15s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['20.225.54.134:9100']

@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  prometheus:
+    image: prom/prometheus:v2.42.0
+    volumes:
+      - /home/brando/prometheus/:/etc/prometheus/
+      - /cloud_drive/prometheus_data/:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=5d'
+    ports:
+      - 9090:9090
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - dfwnet
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=brando
+      - GF_SECURITY_ADMIN_PASSWORD=XEuvsiN1
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    volumes:
+      - /cloud_drive/grafana:/var/lib/grafana
+    networks:
+      - dfwnet
+networks:
+  dfwnet:
+    external: true
+    name: dfwnet

@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  hotelapi:
+    image: eventec.azurecr.io/eventechotelwebapi:1.5.9
+    environment:
+      - ASPNETCORE_URLS=http://*:5000
+      - ASPNETCORE_ENVIRONMENT=Production
+      - SEQ_CONFIG=http://hotellogs:5341/|0pB0qGdC0WZXeBXdXTuP
+      - REDIS_CONFIG=cache:6389|DfwRedisCache|IWfNnSSLL05IoTyv9VVQ
+      - POSTGRES_CONFIG=DfwCluster
+      - HOSTNAME=$HOSTNAME
+      - CLUSTER=dfw_cluster
+      - LC_ALL=en_US.UTF-8
+      - LANG=en_US.UTF-8
+      - WEBHOST=default
+    ports:
+      - 5000:5000
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
+    networks:
+      - dfwnet
+  eventecapi:
+    image: eventec.azurecr.io/eventecwebapi:3.6.8
+    environment:
+      - ASPNETCORE_URLS=http://*:5000
+      - ASPNETCORE_ENVIRONMENT=Production
+      - SEQ_CONFIG=http://eventecapilogs:5341/|Yjl5rZPrfUvwoCaSaGIC
+      - REDIS_CONFIG=cache:6389|DfwRedisCache|IWfNnSSLL05IoTyv9VVQ
+      - POSTGRES_CONFIG=DfwCluster
+      - HOSTNAME=$HOSTNAME
+      - CLUSTER=dfw_cluster
+      - LC_ALL=en_US.UTF-8
+      - LANG=en_US.UTF-8
+      - WEBHOST=default
+    ports:
+      - 5008:5000
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - dfwnet
+networks:
+  dfwnet:
+    external: true
+    name: dfwnet

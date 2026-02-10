@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  hotellogs:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINUSERNAME=brando
+      - SEQ_FIRSTRUN_ADMINPASSWORDHASH=FAes435kDLuPUnN0drDNoboq+7tc7Ot5POeqMv8+dq8KYAqTSw==
+      - SEQ_FIRSTRUN_REQUIREAUTHTENTICATIONFORHTTPINGESTION=False
+    volumes:
+      - /cloud_drive/seq/hotel-logs:/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+    ports:
+      - 8003:80
+      - 6341:5341
+    networks:
+      - dfwnet
+  eventecapilogs:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINUSERNAME=brando
+      - SEQ_FIRSTRUN_ADMINPASSWORDHASH=FAes435kDLuPUnN0drDNoboq+7tc7Ot5POeqMv8+dq8KYAqTSw==
+      - SEQ_FIRSTRUN_REQUIREAUTHTENTICATIONFORHTTPINGESTION=False
+    volumes:
+      - /cloud_drive/seq/eventec-api-logs:/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+    ports:
+      - 8005:80
+      - 6343:5341
+    networks:
+      - dfwnet
+networks:
+  dfwnet:
+    external: true
+    name: dfwnet

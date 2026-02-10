@@ -1,0 +1,96 @@
+version: "3.8"
+
+services:
+  yarp:
+    image: eventec.azurecr.io/yarpreverseproxydfw:1.2
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+    networks:
+      - dfwnet
+  hotellogs:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINUSERNAME=brando
+      - SEQ_FIRSTRUN_ADMINPASSWORDHASH=FAes435kDLuPUnN0drDNoboq+7tc7Ot5POeqMv8+dq8KYAqTSw==
+      - SEQ_FIRSTRUN_REQUIREAUTHTENTICATIONFORHTTPINGESTION=False
+    volumes:
+      - /cloud_drive/seq/hotel-logs:/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+    ports:
+      - 8003:80
+      - 6341:5341
+    networks:
+      - dfwnet
+  eventecapilogs:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINUSERNAME=brando
+      - SEQ_FIRSTRUN_ADMINPASSWORDHASH=FAes435kDLuPUnN0drDNoboq+7tc7Ot5POeqMv8+dq8KYAqTSw==
+      - SEQ_FIRSTRUN_REQUIREAUTHTENTICATIONFORHTTPINGESTION=False
+    volumes:
+      - /cloud_drive/seq/eventec-api-logs:/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+    ports:
+      - 8005:80
+      - 6343:5341
+    networks:
+      - dfwnet
+  prometheus:
+    image: prom/prometheus:v2.42.0
+    volumes:
+      - /home/brando/prometheus/:/etc/prometheus/
+      - /cloud_drive/prometheus_data/:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=5d'
+    ports:
+      - 9090:9090
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - dfwnet
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=brando
+      - GF_SECURITY_ADMIN_PASSWORD=XEuvsiN1
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    volumes:
+      - /cloud_drive/grafana:/var/lib/grafana
+    networks:
+      - dfwnet 
+networks:
+  dfwnet:
+    external: true
+    name: dfwnet 
+    

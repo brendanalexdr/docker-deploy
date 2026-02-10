@@ -1,0 +1,57 @@
+version: "3.8"
+services:
+  db:
+    image: eventec.azurecr.io/postgresdfw:3.6
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - dfwnet
+    ports:
+      - 5438:5432
+    volumes:
+      - /cloud_drive/postgres/data:/var/lib/postgresql/data
+      - /cloud_drive/postgres/backups:/var/pg-backups
+  cache:
+    image: eventec.azurecr.io/redisdfw:1.0
+    volumes:
+     - /cloud_drive/redis:/var/lib/redis
+    environment:
+      - REDIS_PASSWORD=IWfNnSSLL05IoTyv9VVQ
+      - REDIS_SERVER=cache
+    ports:
+      - 6389:6389
+    command: ["sh", "-c", "redis-server --port 6389 --requirepass $${REDIS_PASSWORD} --maxmemory 20mb --maxmemory-policy allkeys-lru --appendonly yes"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - dfwnet
+  pg_exporter:
+    image: wrouesnel/postgres_exporter:latest
+    environment:
+      - DATA_SOURCE_URI=db:5432/postgres?sslmode=disable
+      - DATA_SOURCE_USER=brando
+      - DATA_SOURCE_PASS=i9YRhWZMd3Ja5Te0HO3GbJrGPoCQcoC46XZs5BuZrHt4qGr0PR
+    ports:
+      - 9187:9187
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - dfwnet
+    depends_on:
+      - db     
+networks:
+  dfwnet:
+    external: true
+    name: dfwnet 

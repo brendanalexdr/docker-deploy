@@ -1,0 +1,6 @@
+groups:
+  - name: Cluster0Alerts
+    rules:
+      - alert: InstanceDown 
+        expr: up{job="redis"} < 1 
+        for: 5m

@@ -1,0 +1,3 @@
+VHOST: /
+QUEUE: Eventec.Utility.Application.Listeners.RabbitTestPayload, Eventec.Utility.Application_mailgun
+INDEX: v2

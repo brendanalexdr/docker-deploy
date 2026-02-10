@@ -1,0 +1,9 @@
+docker build -t eventec.azurecr.io/redisdfw:1.0 .
+
+[POWERSHELL]
+az acr login -n eventec
+username:  eventec
+password:  D8YMXNe/uut4lwFSY8ERoIxkpdbLhqPe
+
+docker push eventec.azurecr.io/redisdfw:1.0
+

@@ -1,0 +1,53 @@
+version: '3.4'
+
+services:
+ cache:
+    image: redis
+    container_name: cache
+    volumes:
+     - D:/Repos/docker-deploy/local-seq-redis/redis/data:/var/lib/redis
+     - D:/Repos/docker-deploy/local-seq-redis/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD=IWfNnSSLL05IoTyv9VVQ
+      - REDIS_SERVER=cache
+    ports:
+      - 6381:6381
+    command: ["sh", "-c", "redis-server --port 6381 --requirepass $${REDIS_PASSWORD} --maxmemory 20mb --maxmemory-policy allkeys-lru --appendonly yes"]
+    networks:
+      - localnet
+ eventecapilogs:
+    image: datalust/seq:2023.1
+    container_name: eventecapilogs
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINUSERNAME=brando
+      - SEQ_FIRSTRUN_ADMINPASSWORDHASH=FAes435kDLuPUnN0drDNoboq+7tc7Ot5POeqMv8+dq8KYAqTSw==
+      - SEQ_FIRSTRUN_REQUIREAUTHTENTICATIONFORHTTPINGESTION=False
+    volumes:
+      - D:/Repos/docker-deploy/local-seq-redis/seq/eventec-api-logs:/data
+    ports:
+      - 8005:80
+      - 6343:5341
+    networks:
+      - localnet
+ rabbitmq:
+   image: rabbitmq:4.0-management
+   container_name: rabbitmq
+   ports:
+     - 5672:5672
+     - 15672:15672
+   volumes:
+     - D:/Repos/docker-deploy/local-seq-redis/rabbitmq/data:/var/lib/rabbitmq
+     - D:/Repos/docker-deploy/local-seq-redis/rabbitmq/logs:/var/log/rabbitmq
+   environment:
+     RABBITMQ_DEFAULT_USER: brando
+     RABBITMQ_DEFAULT_PASS: XEuvsiN1
+   entrypoint: >
+      sh -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && exec docker-entrypoint.sh rabbitmq-server"
+   networks:
+     - localnet
+
+networks:
+  localnet:
+    external: true
+    name: localnet 

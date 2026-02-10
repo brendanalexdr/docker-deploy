@@ -1,0 +1,1 @@
+0 1 * *   brando  docker exec -it dbredis_db.1.vrmxr9poyll2r28gfn0f1areq /etc/pg-backup/pg-backup.sh
