@@ -12,7 +12,16 @@ This will generate a private and public key
 
 ## Config the server
 
-On the server
+Install ssh on server:
+
+```
+sudo apt update
+sudo apt install openssh-server
+sudo systemctl status ssh
+sudo ufw allow ssh
+```
+
+Server ssh config
 
 ```bash
 - create the following file (sudo):  /etc/ssh/authorized_keys
@@ -24,7 +33,7 @@ On the server
 -- ChallengeResponseAuthentication no
 -- PasswordAuthentication no
 save and exit
-- restart ssh: sudo service ssh restart
+- restart ssh: sudo systemctl restart ssh
 ```
 
 ## Modify Terminal Startup

@@ -1,0 +1,3 @@
+VHOST: /
+QUEUE: rabbit_test
+INDEX: v2
