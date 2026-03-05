@@ -4,7 +4,7 @@ services:
     container_name: cache
     volumes:
      - D:/Repos/docker-deploy/local-seq-redis/redis/data:/var/lib/redis
-     - D:/Repos/docker-deploy/local-seq-redis/redis/redis.conf:/usr/local/etc/redis/redis.conf
+     - D:/Repos/docker-deploy/local-seq-redis/redis.conf:/usr/local/etc/redis/redis.conf
     environment:
       - REDIS_PASSWORD=IWfNnSSLL05IoTyv9VVQ
       - REDIS_SERVER=cache
