@@ -1,3 +1,0 @@
-VHOST: /
-QUEUE: Eventec.Utility.Application.Listeners.RabbitTestPayload, Eventec.Utility.Application_rabbit_test
-INDEX: v2
