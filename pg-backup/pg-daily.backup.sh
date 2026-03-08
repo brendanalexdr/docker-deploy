@@ -4,11 +4,11 @@
 PG_HOST="localhost"           # PostgreSQL host
 PG_PORT="5432"                # PostgreSQL port
 PG_USER="postgres"            # User with replication privileges
-BACKUP_DIR="/tmp/pgbackups" # Directory to store backups
-DATE=$(date +%Y-%m-%-d)   # Timestamp for backup directory
+BACKUP_DIR="/home/postgres" # Directory to store backups
+DATE=$(date +%F)   # Timestamp for backup directory
 LOG_FILE="$BACKUP_DIR/pg_basebackup.log"
 
-#su -u postgres
+su -u root
 echo '-------------------------'
 echo $USER
 
@@ -34,6 +34,8 @@ if [ $? -eq 0 ]; then
 else
     echo "pg_basebackup failed. Check $LOG_FILE for details." | tee -a "$LOG_FILE"
 fi
+
+sudo /bin/bash  /usr/bin/pg-scripts/pg-delete-old-backups.sh
 
 # Optional: Clean up old backups (e.g., keep last 7 days)
 # find "$BACKUP_DIR" -maxdepth 1 -type d -name "2*" -mtime +7 -exec rm -rf {} \;
