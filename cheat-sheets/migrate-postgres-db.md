@@ -107,75 +107,55 @@ ALTER USER postgres WITH PASSWORD 'your_new_password';
 
 ## 3. Migrate Postgres Data
 
-### d) Stop the PostgreSQL Service
+### a) Create the target database (if it doesn't exist yet):
 
 ```bash
-sudo systemctl stop postgresql
+sudo -u postgres createdb eventec_db
 ```
 
-### e) Prepare the Data Directory
+### b) Restore the database:
 
 ```bash
-# Move the existing data to a backup folder just in case
-sudo mv /var/lib/postgresql/18/main /var/lib/postgresql/18/main_old
-
-
-# Create a fresh, empty directory
-sudo mkdir -p /var/lib/postgresql/18/main
-chmod 700 /var/lib/postgresql/18/main
+sudo -u postgres psql eventec_db < /path/to/your/backup_file.sql
 ```
 
-### f) Extract the Backup
+## 4. setup backup script to the new server
+
+### a)create the following backup script
 
 ```bash
-# Assuming base.tar.gz is in your current directory
-sudo tar -xzvf base.tar.gz -C /var/lib/postgresql/18/main/
+sudo mkdir /bin/pg-backup
+sudo touch /bin/pg-backup/pg-daily-backup.sh
 ```
 
-### g) Extract it into the pg_wal Directory
+### b) add the following bash script to pg-daily-backup.sh
 
 ```bash
-# Assuming /var/lib/postgresql/18/main is your PGDATA
-tar -xzvf /path/to/backup/pg_wal.tar.gz -C /var/lib/postgresql/18/main/pg_wal/
+!/bin/bash
+
+# Configuration
+BACKUP_DIR="/mnt/pgbackups"
+DB_NAME="eventec_db"
+DATE=$(date +%Y-%m-%d_%H-%M-%S)
+FILE_NAME="$BACKUP_DIR/$DB_NAME-$DATE.sql.gz"
+
+# Ensure backup directory exists
+mkdir -p $BACKUP_DIR
+
+# Run pg_dump and compress the output
+sudo -u postgres pg_dump $DB_NAME | gzip > $FILE_NAME
+
+# Optional: Delete backups older than 7 days to save space
+find $BACKUP_DIR -type f -mtime +7 -name "*.sql.gz" -delete
 ```
 
-### g) Fix Permissions
-
-```bash
-# Change ownership to the postgres user
-sudo chown -R postgres:postgres /var/lib/postgresql/18/main/
-sudo chmod 700 /var/lib/postgresql/18/main/
-
-sudo chown -R postgres:postgres /var/lib/postgresql/18/main/pg_wal
-sudo chmod 700 /var/lib/postgresql/18/main/pg_wal
-```
-
-### i) Start the Server
-
-```bash
-sudo systemctl start postgresql
-```
-
-Check the logs to ensure everything initialized correctly:
-
-```bash
-sudo tail -f /var/log/postgresql/postgresql-18-main.log
-```
-
-## 4. Migrate backup scripts to the new server
-
-![FTP Files](./pg-backup-files-ftp-screenshot.png)
-
-### a) create scripts directory
-
-```bash
-sudo mkdir /usr/bin/pg-scripts
-sudo cp /home/brando/ftp/files/*  /usr/bin/pg-scripts
-```
-
-### b) conifgure crontab
+## 5. conifgure crontab
 
 ```bash
 0 3 * * * /bin/bash /usr/bin/pg-scripts/pg-daily.backup.sh
 @reboot sudo blobfuse /mnt/pgbackups --tmp-path=/tmp/pgbackups  --config-file=/etc/fuse_azure_connection.yml
+
+0 3 * * * /bin/bash /bin/bash /bin/pg-backup/pg-daily-backup.sh
+@reboot sudo blobfuse2 mount /mnt/pgbackups --tmp-path=/tmp/pgbackups --config-file=/etc/fuse_azure_connection.yml
+
 ```
