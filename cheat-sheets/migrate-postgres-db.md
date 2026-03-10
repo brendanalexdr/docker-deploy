@@ -155,7 +155,7 @@ find $BACKUP_DIR -type f -mtime +7 -name "*.sql.gz" -delete
 0 3 * * * /bin/bash /usr/bin/pg-scripts/pg-daily.backup.sh
 @reboot sudo blobfuse /mnt/pgbackups --tmp-path=/tmp/pgbackups  --config-file=/etc/fuse_azure_connection.yml
 
-0 3 * * * /bin/bash /bin/bash /bin/pg-backup/pg-daily-backup.sh
+0 3 * * * /bin/bash /bin/pg-backup/pg-daily-backup.sh
 @reboot sudo blobfuse2 mount /mnt/pgbackups --tmp-path=/tmp/pgbackups --config-file=/etc/fuse_azure_connection.yml
 
 ```
